@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>imosVideoDemo</title>
+    <link rel="shortcut icon" href="piv.ico" />
+    <script type="text/javascript" src="../common/axios.min.js"></script>
+    <script type="text/javascript" src="../common/forge.min.js"></script>
+    <script type="text/javascript" src="../common/jquery-1.9.1.js"></script>
+	<style>
+		p,button{
+			display: none;
+		}
+		*{
+			padding: 0px !important;
+			margin: 0px !important;
+		}
+		html,body,.forVideo,.full,.imosSdk-video{
+			width: 100% !important;
+			height: 100% !important;
+		}
+		.imosSdk-video{
+			border: none !important;
+		}
+	</style>
+</head>
+<!-- 注意！！！！！！！！！ -->
+<!-- 
+	以下imosSdk.html及imosSdk.min.js引用地址需更改
+	imosSdk.min.js引用地址需与服务器版本一致
+    流程 登录-》创建窗格
+ -->
+
+<body>
+    <div class="forVideo" style="display: flex;flex-flow: row wrap;justify-content:center; align-items: center;"></div>   
+</body>
+<script>
+        var iframeObj,dataList={};
+        var videoDom = document.getElementsByClassName("forVideo")[0];
+        var videoNum = 0; //video的数量
+		
+		// 监听父页面的消息
+		window.addEventListener('message', function(e){
+			if(e && e.data){
+				switch (e.data.action){
+					case 'init'://初始化
+						//页面加载时创建播放实例初始化
+						dataList=e.data.list;
+						console.log(dataList);						
+						dataList={//测试数据
+							ip:'47.108.153.68',
+							userName:'test2021',
+							userPass:'test_2021',
+							deviceCode:'50002799991319990001',
+							isplayback:2,
+							startTime:'2021-08-18 04:00:00',
+							endTime:'2021-08-18 10:00:00',
+						}
+						loadJS('http://'+dataList.ip+':7010/static/imosSdk.min.js',function(){
+							init();
+						});
+					break;
+					case 'destroy':
+						stopPlay();
+					break;
+				}
+			}
+		})
+		//动态引入js http://10.10.10.2:7010/static/imosSdk.min.js
+		function loadJS(url, callback){
+			var script = document.createElement('script'),			
+			fn = callback || function(){};			
+			script.type = 'text/javascript';			
+			script.src = url;
+		    //IE			
+			 if(script.readyState){			
+				script.onreadystatechange = function(){			
+					if( script.readyState == 'loaded' || script.readyState == 'complete' ){			
+						script.onreadystatechange = null;			
+						fn();			
+					}			
+				};
+		
+			}else{			
+				//其他浏览器			
+				script.onload = function(){			
+					fn();			
+				};			
+			}		
+			document.getElementsByTagName('head')[0].appendChild(script);
+		}
+		//初始化
+		function init(){
+			try{
+				var d=new Date(dataList.startTime);
+				if(!dataList.endTime){
+					d.setTime(d.getTime()+5*60*1000);
+					dataList.endTime=d.Format('yyyy-MM-dd hh:mm:ss')
+				}
+			}catch(e){
+				//TODO handle the exception
+			}
+			login(dataList.ip,dataList.userName,dataList.userPass);
+		}
+        //#region 准备部分
+        function login(ipaddr,username,password) {//服务器地址 用户名 密码
+            axios({
+                method: "POST",
+                url: "http://" + ipaddr + ":7010/VIID/login/v2",
+                headers: {
+                    "Content-Type": "application/json; charset=utf8"
+                },
+                responseType: "json"
+            }).then(function (res) {
+                var accessCode = res.data.AccessCode;
+                var md1 = forge.md.md5.create(); //md5
+                var md2 = forge.md.md5.create(); //md5
+                md1.update(password); //md5
+                var passwordMd5 = md1.digest().toHex(); //md5
+                var base64Username = window.btoa(username);
+                var loginSignatureTemp =base64Username + accessCode + passwordMd5;
+                md2.update(loginSignatureTemp); //md5
+                var loginSignature = md2.digest().toHex(); //md5
+                var data = {
+                    UserName: username,
+                    AccessCode: accessCode,
+                    LoginSignature: loginSignature
+                };
+                axios({
+                    method: "POST",
+                    url: "http://" + ipaddr + ":7010/VIID/login/v2",
+                    headers: {
+                        "Content-Type": "application/json; charset=utf8"
+                    },
+                    responseType: "json",
+                    data: data
+                }).then(function (r) {
+                    loginResult = r.data.ErrCode;
+                    switch (
+                    loginResult //判断返回值：12351是‘用户不存在’；50004是‘密码错误，登录失败’
+                    ) {
+                        case 50004:						
+                            alert("密码错误");
+                            break;
+                        case 12351:
+							
+                            alert("用户不存在");
+                            break;
+                        case undefined:
+                            window.token = r.data.AccessToken;
+                            var vmip = ipaddr;
+                            imosSdk.init(
+                                vmip,
+                                window.token,
+                                9,
+                                "/static/js/yushi/app/imosSdk.html"
+                            ).then(function (res) {
+                                console.log("登录成功");
+								creatWindow();
+                            }).catch(function (err) {
+								
+                                console.log(err);
+                                alert("调用失败" + err);
+                            });
+                            break;
+                    }
+                })
+				.catch(function (e) {					
+					alert("服务器连接异常");
+					console.log(e);
+				});
+            })
+			.catch(function (error) {				
+				alert("服务器连接异常");
+				console.log(error);
+			});
+        }
+        function creatWindow() {
+            if (!window.token) {
+                alert("请先登录");
+                return;
+            }
+
+            iframeObj = imosSdk.createPanelWindow();
+            // 如果窗格创建已经到达上限
+            if (iframeObj === null) {
+                return;
+            }
+
+            createSpeDiv(iframeObj);
+            videoNum++;
+        }
+
+        /**
+         * 创建包含了input和按钮的div
+         * @param iframeObj iframe对象
+         **/
+         function createSpeDiv(iframeObj) {
+            var divDom = document.createElement("div");
+			divDom.className="full";
+            let date = new Date();
+            divDom.innerHTML =
+                '<p>摄像机编码:<input type="text" value="'+dataList.deviceCode+'" class="cameraCode' +
+                videoNum +
+                '" />' +
+                "<button onclick=\"playLive('" +
+                iframeObj.id +
+                "'," +
+                videoNum +
+                ')">播放实况</button>' +
+                "<button onclick=\"stopPlay('" +
+                iframeObj.id +
+                "')\">停止播放</button></p>" +
+                '<p><input id="startd' +
+                iframeObj.id +
+                '" type="date" value="' + date.getFullYear() + '-' + ("0" + (date.getMonth() + 1)).substr(-2) + '-' + ("0" + date.getDate()).substr(-2) + '"/>' +
+                '<input id="startt' +
+                iframeObj.id +
+                '" type="time" value="01:00:00" step="1"/>' +
+                '<input id="endd' +
+                iframeObj.id +
+                '" type="date" value="' + date.getFullYear() + '-' + ("0" + (date.getMonth() + 1)).substr(-2) + '-' + ("0" + date.getDate()).substr(-2) + '" step="1"/>' +
+                '<input id="endt' +
+                iframeObj.id +
+                '" type="time" value="23:59:59" step="1"/></p>' +
+                "<p><button onclick=\"replay('" +
+                iframeObj.id +
+                "'," +
+                videoNum +
+                ')" >播放回放</button>' +
+                '<button onclick="continuePlay(\'' + iframeObj.id + '\')">播放</button>' +
+                '<button onclick="pausePlay(\'' + iframeObj.id + '\')">暂停</button>' +
+                '<button onclick="playSpeed(\'' + iframeObj.id + '\')" id="' + iframeObj.id + '-speed">切换到2倍速</button>' +
+                '<button onclick="singleFrame(\'' + iframeObj.id + '\')">单帧</button>' +
+                '<button onclick="stepFrame(\'' + iframeObj.id + '\')">逐帧</button>' +
+                '<button onclick="playcatch(\'' + iframeObj.id + '\')">抓拍</button></p>' +
+                '<p><button onclick="addTitleBtn(\'' + iframeObj.id + '\')">增加自定义标题按钮</button>' +
+                '<button onclick="delTitleBtn(\'' + iframeObj.id + '\')">删除标题按钮</button></p>' +
+                '<p><button onclick="startPtzCtrl(\'' + videoNum + '\')">启动云台控制</button>' +
+                '<button onclick="releasePtzCtrl(\'' + videoNum + '\')">释放云台控制</button>' +
+                '<button onclick="sendPtzCtrl(\'' + videoNum + '\')">发送云台控制</button>' +
+                '<button onclick="setPreset(\'' + videoNum + '\')">设置预置位</button>' +
+                '</p>' +
+                '<button onclick="usePreset(\'' + videoNum + '\')">使用预置位</button>' +
+                '</p>' +
+                '<p><button onclick="playStatus(\'' + iframeObj.id + '\')">状态输出到控制台</button>' +
+                '<input type="text" value="'+(dataList.startTime||'')+'" id="recordJump"/>' +
+                '<button onclick="recordJump(\'' + iframeObj.id + '\')">跳转播放</button></p>';
+            divDom.appendChild(iframeObj);
+            videoDom.appendChild(divDom);
+            divDom = null;			
+			
+			if(dataList.isplayback==1){//实时
+				playLive(iframeObj.id,videoNum)
+			}else{
+				replay(iframeObj.id,videoNum)
+			}
+        }
+		
+        //#endregion
+		
+		//#region 实况相关
+		function playLive(iframeId, videoIndex) {
+		    if (!window.token) {
+		        alert("请先登录");
+		        return;
+		    }
+		    var cameraCode = document.getElementsByClassName(
+		        "cameraCode" + videoIndex
+		    )[0].value;
+		    imosSdk.playLive(
+		        iframeId,
+		        cameraCode,
+		        cameraCode,
+		        function (e) {
+		            console.log(e);
+		        }, 1
+		    );
+		    cameraCode = null;
+		}
+		// 停止播放
+		function stopPlay(iframeId) {
+		    if (!window.token) {
+		        alert("请先登录");
+		        return;
+		    }
+		    imosSdk.playStop(iframeId, function (e) {
+		        console.log(e);
+		    });
+		}
+		// 跳转到指定时间点播放
+		function recordJump(iframeId) {
+		    var jumoTime = document.getElementById("recordJump").value;
+		    imosSdk.recordJump(iframeId, jumoTime, function(e) {
+		        console.log(e);
+				if(e.ErrMsg)alert(e.ErrMsg)
+		    });
+		}
+		//回放
+		function replay(iframeId, videoIndex) {
+		    if (!window.token) {
+		        alert("请先登录");
+		        return;
+		    }
+		    var start = new Date(dataList.startTime);
+		    var end = new Date(dataList.endTime);
+		    var cameraCode =dataList.deviceCode;
+		    imosSdk.playRecord(
+		        iframeId,
+		        cameraCode,
+		        cameraCode,
+		        start,
+		        end,
+		        function (e) {
+		            console.log(e);
+		        }
+		    );
+		}
+		
+		
+        function queryCam() {
+            var vmip = document.getElementById("ip").value;
+            var data = {
+                org: "iccsid",
+                condition: {
+                    ItemNum: 3,
+                    Condition: [{
+                        "QueryType": 256,
+                        "LogicFlag": 0,
+                        "QueryData": "1001"
+                    }, {
+                        "QueryType": 257,
+                        "LogicFlag": 0,
+                        "QueryData": "1"
+                    }, {
+                        "QueryType": 1,
+                        "LogicFlag": 5,
+                        "QueryData": ""
+                    }],
+                    QueryCount: 1,
+                    PageFirstRowNumber: 0,
+                    PageRowNum: 20
+                }
+            };
+            $.ajax({
+                type: "GET",
+                url: "http://" + vmip + ":7010/VIID/query",
+                data: {
+                    org: data.org,
+                    condition: JSON.stringify(data.condition)
+                },
+                headers: {
+                    Authorization: window.token
+                },
+                contentType:"application/json",
+                success: function(res) {
+                    var arr = [];
+                    if(res.ErrCode === 0) {
+                        var infoList = res.Result.InfoList;
+                        var len = infoList.length;
+                        for(var i = 0; i < len; i++) {
+                            if(infoList[i].ResItemV1.ResStatus === 1) {
+                                arr.push(infoList[i].ResItemV1.ResCode);
+                            }
+                        }
+                        camInput.value = arr.join(',');
+                    }
+                }
+            })
+        }
+
+        function startPtzCtrl(videoIndex) {
+            var vmip = document.getElementById("ip").value;
+            var cameraCode = document.getElementsByClassName(
+                "cameraCode" + videoIndex
+            )[0].value;
+            $.ajax({
+                type: "POST",
+                url: "http://" + vmip + ":7010/VIID/ptz/start/" + cameraCode,
+                headers: {
+                    Authorization: window.token
+                },
+                contentType:"application/json",
+                success: function(res) {
+                    if(res.ErrCode === 0) {
+                        console.log('Start PTZ')
+                    }
+                }
+            })
+        }
+
+        function sendPtzCtrl(videoIndex) {
+            var vmip = document.getElementById("ip").value;
+            var cameraCode = document.getElementsByClassName(
+                "cameraCode" + videoIndex
+            )[0].value;
+            axios({
+                url: "http://" + vmip + ":7010/VIID/ptz/ctrl/" + cameraCode,
+                method: 'post',
+                data: {
+                    PTZCmdID: 0x0502, //向右转动
+                    PTZCmdPara1: 6,
+                    PTZCmdPara2: 6,
+                    PTZCmdPara3: 2
+                },
+                headers: {
+                    Authorization: window.token,
+                    'Content-Type': 'application/json'
+                }
+            }).then(function(res){
+                if(res.data.ErrCode === 0) {
+                    //3秒后停止转动
+                    setTimeout(function() {
+                        axios({
+                        url: "http://" + vmip + ":7010/VIID/ptz/ctrl/" + cameraCode,
+                        method: 'post',
+                        data: {
+                            PTZCmdID: 0x0901, //全部停止
+                            PTZCmdPara1: 6,
+                            PTZCmdPara2: 6,
+                            PTZCmdPara3: 2
+                        },
+                        headers: {
+                            Authorization: window.token,
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    }, 3000)
+                }
+            })
+        }
+
+        function releasePtzCtrl(videoIndex) {
+            var vmip = document.getElementById("ip").value;
+            var cameraCode = document.getElementsByClassName(
+                "cameraCode" + videoIndex
+            )[0].value;
+            $.ajax({
+                type: "POST",
+                url: "http://" + vmip + ":7010/VIID/ptz/release/" + cameraCode,
+                headers: {
+                    Authorization: window.token
+                },
+                contentType:"application/json",
+                success: function(res) {
+                    if(res.ErrCode === 0) {
+                        console.log('release PTZ')
+                    }
+                }
+            })
+        }
+
+        var presetCode = 1; //预置位编码
+        function setPreset(videoIndex) {
+            var vmip = document.getElementById("ip").value;
+            var cameraCode = document.getElementsByClassName(
+                "cameraCode" + videoIndex
+            )[0].value;
+            axios({
+                url: "http://" + vmip + ":7010/VIID/ptz/preset/set/" + cameraCode,
+                method: 'post',
+                data: {
+                    PresetValue: presetCode,
+                    PresetDesc: "预置位1"
+                },
+                headers: {
+                    Authorization: window.token,
+                    'Content-Type': 'application/json'
+                }
+            }).then(function(res) {
+                if(res.data.ErrCode === 0) {
+                    presetCode = 1;
+                }
+            })
+        }
+
+        function usePreset(videoIndex) {
+            var vmip = document.getElementById("ip").value;
+            var cameraCode = document.getElementsByClassName(
+                "cameraCode" + videoIndex
+            )[0].value;
+            axios({
+                url: "http://" + vmip + ":7010/VIID/ptz/preset/use/" + cameraCode + "/" + presetCode,
+                method: 'GET',
+                headers: {
+                    Authorization: window.token,
+                    'Content-Type': 'application/json'
+                }
+            })
+        }
+        
+        //#region 本地播放器
+        
+        function openLocalPlayer() {
+            var $iframe = document.createElement('iframe');
+            $iframe.style.display = 'none';
+            $iframe.src = 'imos://startXPWebPlayer';
+            $iframe.onload = function() {
+                var timer = setTimeout(function(){
+                    clearTimeout(timer);
+                    document.body.removeChild($iframe);
+                }, 5000);
+            }
+            document.body.appendChild($iframe);
+        }
+
+        function downloadLocalPlayer() {
+            var vmip = document.getElementById("ip").value;
+            var aobj = document.createElement('a');
+            aobj.download = '监控视频播放器.msi';
+            aobj.href = 'http://' + vmip + '/ActiveX/WEBPlayer.msi';
+            document.body.appendChild(aobj);
+            aobj.click();
+            document.body.removeChild(aobj);
+        }
+
+        function checkLocalPlayer() {
+            var btn = window.document.getElementById('imos_check_open_btn');
+            imosSdk.checkOutWebPlayer().then(function(){
+                if (res.ErrCode === 0) {
+                    btn.innerText = '打开播放器成功';
+                } else {
+                    btn.innerText = res.ErrMsg;
+                }
+            })
+        }
+
+        function playSpeed(iframeId) {
+            var btn = document.getElementById(iframeId + '-speed');
+            var speed = 2;
+
+            if (typeof (btn.nextSpeed) === 'number') {
+                speed = btn.nextSpeed;
+            }
+            imosSdk.recordSpeed(iframeId, speed, function(e) {
+                console.log(e);
+            });
+            switch (speed) {
+                case 1:
+                    btn.nextSpeed = 2;
+                    btn.innerText = '切换到' + btn.nextSpeed + '倍速';
+                    break;
+                case 2:
+                    btn.nextSpeed = 4;
+                    btn.innerText = '切换到' + btn.nextSpeed + '倍速';
+                    break;
+                case 4:
+                    btn.nextSpeed = 8;
+                    btn.innerText = '切换到' + btn.nextSpeed + '倍速';
+                    break;
+                case 8:
+                    btn.nextSpeed = 1 / 8;
+                    btn.innerText = '切换到' + btn.nextSpeed + '倍速';
+                    break;
+                case 1 / 8:
+                    btn.nextSpeed = 1;
+                    btn.innerText = '切换到' + btn.nextSpeed + '倍速';
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+
+        function singleFrame(iframeId) {
+            imosSdk.singleFrame(iframeId,function(e){ 
+                console.log(e);
+            })
+        }
+
+        function stepFrame(iframeId) {
+            imosSdk.stepFrame(iframeId, function(e){ 
+                console.log(e);
+            })
+        }
+
+        function switchPlay(iframeId) {
+            imosSdk.switchPlayStatus(iframeId, function(e) {
+                console.log(e);
+            });
+        }
+
+        function continuePlay(iframeId) {
+            imosSdk.switchPlayStatus(iframeId, function(e){
+                console.log(e);
+            }, true);
+        }
+
+        function pausePlay(iframeId) {
+            imosSdk.switchPlayStatus(iframeId, function(e){
+                console.log(e);
+            }, false);
+        }
+
+        function playStatus(iframeId) {
+            imosSdk.playStatus(iframeId, function(e){
+                console.log(e);
+            })
+        }
+
+        
+        //#endregion
+
+        function addTitleBtn(iframeId) {
+            imosSdk.addTitleBtn(iframeId, {
+                id: 'button1',
+                className: '123123',
+                iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA39pVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQyIDc5LjE2MDkyNCwgMjAxNy8wNy8xMy0wMTowNjozOSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpkODFkOWUyOS00ZmZkLThiNDItYWFjNC0yNzQxOGMzNTkwNWIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QTcwN0JGODZFMzI2MTFFOEEyQjJGQkQ5NjIwNjk1QzciIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QTcwN0JGODVFMzI2MTFFOEEyQjJGQkQ5NjIwNjk1QzciIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIChXaW5kb3dzKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjYwMTE0YzVhLTY0NmYtMzQ0NC04NWJhLTBhZjBiM2Y0MTVmNCIgc3RSZWY6ZG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOmZiMWI3ODEwLTAzOTAtNGE0Yy1hZThjLWFiODhjZmY0NmUyMCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PuEEvCMAAAB3SURBVHjaYvz//z8DLQHjqAUj2IJjJ07BJBiB+D8RNIOVhRkjujlMhBxAIo0BWIgwnJgwZMRlCT4L/hPjQiQH/MemjokIHxAdn9gEmYhwGbHgP6kWDA0fsBDpov/k+oCYVMRIgg9Izmj/SaRHS9NRC4aiBQABBgBMoEQFENxDRQAAAABJRU5ErkJggg==',
+                tip: '自定义按钮'
+            }, function(el){ console.log(el) })
+        }
+
+        function delTitleBtn(iframeId) {
+            imosSdk.delTitleBtn(iframeId, 'button1', function(el){ console.log(el) })
+        }
+
+        
+        function playcatch(iframeId) {
+            imosSdk.playCatch(iframeId, function (e) {
+                var arr = e.Img.split(','),
+                    mime = arr[0].match(/:(.*?);/)[1],
+                    bstr = atob(arr[1]),
+                    n = bstr.length,
+                    u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                var blob = new Blob([u8arr], {
+                    type: mime
+                });
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'test.jpg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 'image/jpeg');
+        }
+
+        //#endregion
+        
+        //#region 下载
+        function startDownload() {
+            var start = new Date(
+                document.getElementById('downloadStartdate').value +
+                " " +
+                document.getElementById('downloadStarttime').value
+            );
+            var end = new Date(
+                document.getElementById('downloadEnddate').value +
+                " " +
+                document.getElementById('downloadEndtime').value
+            );
+            var cameraCode = document.getElementById('downloadCode').value;
+            imosSdk.downloadRecord(cameraCode, start, end, function(e){
+                console.log(e);
+                document.getElementById('taskID').value = e.Taskid;
+            });
+        }
+        function getDownloadStatus() {
+            var taskId = document.getElementById('taskID').value;
+            imosSdk.getDownloadItemInfo(taskId, function(result){ 
+                if(result.ErrCode === 0){ 
+                    console.log('执行成功'); 
+                    console.log(result.Progress, result.Status)
+                }else{
+                    console.log('执行失败：'+ result.ErrMsg);
+                }
+            });
+        }
+        function cancleDownload() {
+            var taskId = document.getElementById('taskID').value;
+            imosSdk.cancelDownload(taskId, function(result){ 
+                if(result.ErrCode === 0){ 
+                    console.log('执行成功'); 
+                }else{
+                    console.log('执行失败：'+ result.ErrMsg);
+                }
+            })
+
+        }
+        /*
+         * js由毫秒数得到年月日 使用： (new Date(arg)).Format("yyyy-MM-dd hh:mm:ss.S")
+         */
+        Date.prototype.Format = function(fmt) {
+        	var o = {
+        		"M+": this.getMonth() + 1, // 月份
+        		"d+": this.getDate(), // 日
+        		"h+": this.getHours(), // 小时
+        		"m+": this.getMinutes(), // 分
+        		"s+": this.getSeconds(), // 秒
+        		"q+": Math.floor((this.getMonth() + 3) / 3), // 季度
+        		"S": this.getMilliseconds() // 毫秒
+        	};
+        	if(/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        	for(var k in o)
+        		if(new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        	return fmt;
+        };
+        //#endregion
+    </script>
+<!-- <script type="text/javascript" src="http://10.10.10.2:7010/static/imosSdk.min.js"></script> -->
+</html>

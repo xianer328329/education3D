@@ -1,0 +1,29 @@
+*{
+    padding: 0;
+    margin: 0;
+	box-sizing: border-box;
+}
+.container,html,body{
+	width: 100%;
+	height: 100%;
+	color: white;
+	background: transparent;
+}
+
+.playWnd{
+	position: relative;
+}
+.tip{
+	color: white;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%,-50%);
+}
+.tip a{
+	color: white;
+	cursor: pointer;
+}
+.textBlue{
+	color: #0ff !important;
+}

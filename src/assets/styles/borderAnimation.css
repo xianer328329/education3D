@@ -1,0 +1,140 @@
+/* 
+.Have_Auth.border-anim::before,
+.Have_Auth.border-anim::after {
+	content: '';
+	position: absolute;
+	height:100%;
+	width:100%;
+	top: 0px;
+	left: 0px;
+	background: url(../../../static/images/borderAni/meteor4.png) no-repeat center;
+	background-size: 6px 236px;
+	transform-origin: center bottom;
+	transform: translate(-49.5%, -98%) rotate(-0deg);
+	opacity: 0;
+	
+}
+
+
+.Have_Auth.LEFT1.border-anim::before, 
+.Have_Auth.CLEFT1.border-anim::before{
+	animation: anim-border-runL 30s linear infinite;
+}
+.Have_Auth.LEFT1.border-anim::after,
+.Have_Auth.CLEFT1.border-anim::after{
+	animation: anim-border-runR 30s linear infinite;
+}
+.Have_Auth.LEFT2.border-anim::before,
+.Have_Auth.CLEFT3.border-anim::before ,
+.Have_Auth.RECTANGLEBOX.border-anim::before {
+	animation: anim-border-runL 30s 5s linear infinite;
+}
+.Have_Auth.LEFT2.border-anim::after,
+.Have_Auth.CLEFT3.border-anim::after,
+.Have_Auth.RECTANGLEBOX.border-anim::after  {
+	animation: anim-border-runR 30s 5s linear infinite;
+}
+.Have_Auth.LEFT4.border-anim::before,
+.Have_Auth.CLEFT4.border-anim::before,
+.Have_Auth.CBOTTOM2-4.border-anim::before,
+.Have_Auth.MAXBOTT.border-anim::before
+{
+	animation: anim-border-runL 30s 10s linear infinite;
+}
+.Have_Auth.LEFT4.border-anim::after,
+.Have_Auth.CLEFT4.border-anim::after,
+.Have_Auth.CBOTTOM2-4.border-anim::after,
+.Have_Auth.MAXBOTT.border-anim::after
+ {
+	animation: anim-border-runR 30s 10s linear infinite;
+}
+.Have_Auth.BOTTOM1.border-anim::before,
+.Have_Auth.CBOTTOM1-3.border-anim::before,
+.Have_Auth.CBOTTOM1.border-anim::before{
+	animation: anim-border-runL 30s 15s linear infinite;
+}
+.Have_Auth.BOTTOM1.border-anim::after,
+.Have_Auth.CBOTTOM1-3.border-anim::after,
+.Have_Auth.CBOTTOM1.border-anim::after{
+	animation: anim-border-runR 30s 15s linear infinite;
+}
+.Have_Auth.BOTTOM2.border-anim::before,
+.Have_Auth.CBOTTOM2.border-anim::before {
+	animation: anim-border-runL 30s 20s linear infinite;
+}
+.Have_Auth.BOTTOM2.border-anim::after,
+.Have_Auth.CBOTTOM2.border-anim::after  {
+	animation: anim-border-runR 30s 20s linear infinite;
+}
+.Have_Auth.BOTTOM3.border-anim::before,
+.Have_Auth.CBOTTOM3.border-anim::before {
+	animation: anim-border-runL 30s 25s linear infinite;
+}
+.Have_Auth.BOTTOM3.border-anim::after,
+.Have_Auth.CBOTTOM3.border-anim::after  {
+	animation: anim-border-runR 30s 25s linear infinite;
+}
+
+
+ 
+
+@keyframes anim-border-runL {
+	0%,0.1%{
+		opacity: 1;
+		transform: translate(-49.5%, -98%) rotate(-0deg);
+	}
+	
+	8.29% {
+		opacity: 1;
+		transform: translate(-49.5%, 92%) rotate(-0deg);
+	}
+	8.3% {
+		opacity: 1;
+		transform: translate(-51%, -1%) rotate(-90deg);
+	}
+	16.59% {
+		transform: translate(100%, -1%) rotate(-90deg);
+		opacity: 1;
+	}
+	16.6% {
+		transform: translate(-49.5%, -98%) rotate(-0deg);
+		opacity: 0;
+		}
+	100%{
+		transform: translate(-49.5%, -98%) rotate(-0deg);
+		opacity: 0;
+	}
+	
+}
+
+@keyframes anim-border-runR {
+	
+	0%,0.1%{
+		opacity: 1;
+		transform: translate(49.5%, -3%) rotate(-180deg);
+	}
+	
+	8.29% {
+		opacity: 1;
+		transform: translate(49.5%, -188%) rotate(-180deg);
+	}
+	8.3% {
+		opacity: 1;
+		transform: translate(48%, -99%) rotate(-270deg);
+	}
+	
+	16.59% {
+		transform: translate(-96%, -99%) rotate(-270deg);
+		opacity: 1;
+	}
+	16.6% {
+		transform: translate(49.5%, -3%) rotate(-180deg);
+		opacity: 0;
+	}
+	100%{
+		transform: translate(49.5%, -3%) rotate(-180deg);
+		opacity: 0;
+	}
+}
+
+ */

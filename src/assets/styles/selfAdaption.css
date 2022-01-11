@@ -1,0 +1,417 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+* {
+  font-size: 0.9rem;
+}
+
+html {
+  font-size: 20px;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+#app {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  bottom: 0px;
+  right: 0px;
+  width: auto !important;
+  height: auto !important;
+  /* min-width: 1200px;
+	min-height: 700px; */
+  box-sizing: border-box;
+  /* overflow: auto; */
+}
+
+/* 垂直居中 start*/
+.vertical-middle-c {
+  text-align: center;
+}
+
+.vertical-middle-c:after {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+
+.vertical-middle {
+  display: inline-block;
+  width: 99%;
+  vertical-align: middle;
+}
+
+/* 垂直居中 end*/
+
+
+/* 弹性盒start */
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.justify-center {
+  justify-content: center;
+}
+.align-center{
+	align-items: center;
+}
+.space-between {
+  justify-content: space-between;
+}
+
+.space-around {
+  justify-content: space-around;
+}
+
+.flex-basis {
+  flex: 1;
+}
+
+/* 弹性盒end */
+
+/* crt start */
+.scaleZoom {
+  transform-origin: left top;
+}
+
+/* crt end */
+/* 基础信息样式start */
+.section-left .SKRINK,
+.section-left .shrinkNav {
+  top: 0px;
+}
+
+.section-left .shrinkNav {
+  right: auto;
+  left: 0px;
+  margin-left: -50px;
+}
+
+.section-left .SKRINK {
+  right: 100%;
+  margin-right: 10px;
+}
+
+/* 基础信息样式end */
+
+/* 地图容器样式start */
+.max-container {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  margin-right: 1.563%;
+  margin-bottom: 1.51%;
+}
+
+.map-container {
+  width: 100%;
+  height: 100%;
+}
+
+.map-index .max-container{
+  /* 数据总览 */
+  right: 23.125%;
+  bottom: 21.851%;
+}
+.map-index .partsClose{
+	 right: 23.125%;
+}
+
+.map-emergency .max-container {
+  /* 应急保障 */
+  bottom: 0px;
+  margin-bottom: 1.042%;
+  right: 25.75rem;
+  margin-right: 0px;
+}
+.map-emergency .partsClose{
+  right: 25.75rem;
+}
+
+.map-emergency.map-emergency-big .max-container,.map-emergency.map-emergency-big .partsClose{
+  /* 应急保障(侧边栏折叠时) */
+  right: 1rem;
+}
+
+.map-emergency.map-emergency-big .emshrinkNav {
+  /* 应急保障(侧边栏折叠时)--侧边栏样式 */
+  right: 1rem;
+  top: 5.8rem
+}
+
+.map-shelter .max-container {
+  /* 宣教应急 */
+  right: 24.4rem;
+  bottom: 0px;
+}
+.map-shelter .partsClose{
+  /* 宣教应急 */
+  right: 24.4rem;
+}
+
+.map-normal .max-container {
+  /* 其他页面 */
+  right: 25.469%;
+  bottom: 26.852%;
+}
+.map-normal .partsClose{
+  /* 其他页面 */
+  right: 25.469%;
+}
+
+.max-container #container {
+  /* 地图 */
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+}
+
+/* 地图容器样式end */
+
+/* 侧边栏样式start */
+.section-left>.Z-border,
+.section-bottom>.Z-border {
+  position: absolute;
+  /* overflow: hidden; */
+}
+
+.section-left>.Z-border>div:nth-last-of-type(1),
+.section-bottom>.Z-border>div:nth-last-of-type(1) {
+  height: 100%;
+}
+
+.section-left>.Z-border,
+.section-bottom>.Z-border {
+  position: absolute;
+  padding: 5px 10px;
+  box-sizing: border-box;
+}
+
+.backboxContainer {
+  height: calc(100% - 2rem);
+  margin-top: 0.5rem;
+}
+
+/* 右边 */
+.section-left>.Z-border {
+  /* 间距9px */
+  width: 25.469%;
+  right: 1.042%;
+}
+
+.section-left>.Z-border:nth-last-of-type(1) {
+  bottom: 0px;
+  margin-bottom: 1.042%;
+}
+
+.section-left>.Z-border:nth-last-of-type(2) {
+  margin-bottom: 1.510%;
+}
+
+.section-left>.Z-border:nth-last-of-type(3) {
+  margin-bottom: 1.979%;
+}
+
+.section-left>.Z-border:nth-last-of-type(4) {
+  margin-bottom: 2.448%;
+}
+.section-left>.Z-border:nth-last-of-type(5){
+    margin-bottom: 3.218%;
+}
+/* 底部 */
+.section-bottom>.Z-border {
+  /* 间距10px */
+  width: 23.646%;
+  height: 26.852%;
+  bottom: 0px;
+  margin-bottom: 1.042%;
+}
+
+.section-bottom>.Z-border:nth-of-type(1) {
+  left: 0px;
+  margin-left: 1.042%;
+}
+
+.section-bottom>.Z-border:nth-of-type(2) {
+  margin-left: 1.563%;
+}
+
+.section-bottom>.Z-border:nth-of-type(3) {
+  margin-left: 2.083%;
+}
+
+.section-bottom>.Z-border:nth-of-type(4) {
+  margin-left: 2.604%;
+}
+
+/* 侧边栏样式end */
+
+/* 形如能耗监管start */
+.half-bottom.section-bottom>.Z-border:nth-last-of-type(1):nth-of-type(1) {
+  right: 27.032%;
+  width: auto;
+}
+
+/* 形如能耗监管end */
+
+/* 形如校园生活start */
+.section-left>.Z-border:nth-last-of-type(1):nth-of-type(3) {
+  height: 26.852%;
+}
+
+.section-left>.Z-border:nth-last-of-type(2):nth-of-type(2) {
+  height: 36.296%;
+  bottom: 26.852%;
+}
+
+.section-left>.Z-border:nth-last-of-type(3):nth-of-type(1) {
+  height: 25.093%;
+  bottom: 63.148%;
+}
+
+.section-bottom>.Z-border:nth-last-of-type(2):nth-of-type(2) {
+  left: 23.646%;
+}
+
+.section-bottom>.Z-border:nth-last-of-type(1):nth-of-type(3) {
+  left: 47.292%;
+}
+
+/* 形如校园生活end */
+
+/* 形如校园消防start */
+.half-left.section-left>.Z-border:nth-last-of-type(1):nth-of-type(2) {
+  height: 36.296%;
+  bottom: 26.852%;
+  margin-bottom: 1.563%;
+}
+
+.half-left.section-left>.Z-border:nth-last-of-type(2):nth-of-type(1) {
+  height: 25.093%;
+  bottom: 64.19%;
+}
+
+.full-bottom.section-bottom>.Z-border:nth-last-of-type(1):nth-of-type(2) {
+  left: 23.646%;
+  right: 1.042%;
+  width: auto;
+}
+
+/* 形如校园消防end */
+
+/* 形如校园安防start */
+.section-left>.Z-border:nth-last-of-type(1):nth-of-type(2) {
+  height: 63.951%;
+  bottom: 0px;
+}
+
+.section-left>.Z-border:nth-last-of-type(2):nth-of-type(1) {
+  height: 25.093%;
+  bottom: 64.19%;
+}
+
+.section-bottom>.Z-border:nth-last-of-type(1):nth-of-type(2) {
+  left: 23.646%;
+  right: 27.032%;
+  width: auto;
+}
+
+/* 形如校园安防end */
+
+/* 形如数据安全start */
+.section-bottom>.Z-border:nth-last-of-type(1):nth-of-type(1) {
+  width: auto;
+  right: 1.042%;
+}
+
+/* 形如数据安全end */
+
+/* 如用电安全star */
+.safety-left>.Z-border:nth-last-of-type(1):nth-of-type(5) {
+  height: 26.852%;
+  bottom: 0px;
+}
+
+.safety-left>.Z-border:nth-last-of-type(2):nth-of-type(4) {
+  height: 18.333%;
+  bottom: 26.852%;
+}
+
+.safety-left>.Z-border:nth-last-of-type(3):nth-of-type(3) {
+  height: 13.148%;
+  bottom: 45.185%;
+}
+
+.safety-left>.Z-border:nth-last-of-type(4):nth-of-type(2) {
+  height: 12.5%;
+  bottom: 58.333%;
+}
+.safety-left>.Z-border:nth-last-of-type(5):nth-of-type(1) {
+  height: 16.759%;
+  bottom: 70.833%;
+}
+
+.safety-bottom>.Z-border:nth-last-of-type(1):nth-of-type(1){
+  width: 72%;
+  right: 1.042%;
+}
+/* 如用电安全end */
+
+/* 轮播 */
+.el-carousel__container {
+  height: 100% !important;
+}
+
+/* 表格 */
+.visible-table.el-table,
+.visible-table.el-table * {
+  overflow: visible !important;
+}
+
+.el-table tr .cell,
+.el-table tr th div,
+.el-table--border tr td:first-child .cell,
+.el-table--border tr th:first-child .cell {
+  padding-left: 0.5rem;
+}
+
+.el-table tr .cell,
+.el-table tr th div {
+  padding-right: 0.5rem;
+}
+
+/* 视频错误提示 */
+.vjs-error .vjs-error-display .vjs-modal-dialog-content {
+  word-break: break-all;
+}
+
+.el-time-panel__content::after,
+.el-time-panel__content::before {
+  margin: 0px !important;
+  padding: 0px !important;
+}
+
+.el-message {
+  min-width: 15rem !important;
+  padding: 0.75rem 0.75rem 0.75rem 1rem !important;
+}
+
+.el-message__icon {
+  margin-right: 0.5rem !important;
+}
+
+.el-message__content {
+  font-size: 0.9rem !important;
+  line-height: 1.2;
+}
